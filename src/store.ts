@@ -10,7 +10,7 @@ const defaultResume: ResumeData = {
   contact: {
     name: 'Joe Doe',
     phone: '+91 XXXXX XXXXX',
-    location: 'Mumbai, India',
+    location: 'City, India',
     email: 'your.personal@gmail.com',
     linkedin: 'linkedin.com/in/joedoe',
     github: 'github.com/joedoe',
