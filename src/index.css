@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Calibri', Arial, sans-serif;
+  background: #f1f5f9;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Print styles — hide the form, only show the resume preview */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: white;
+    margin: 0;
+  }
+  #resume-preview {
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0.5in !important;
+    width: 8.5in !important;
+    min-height: 11in !important;
+    font-size: 10pt !important;
+  }
+  @page {
+    size: letter;
+    margin: 0;
+  }
+}
