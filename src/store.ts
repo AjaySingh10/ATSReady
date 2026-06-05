@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { ResumeData } from './types';
+import type { ResumeData, SectionKey } from './types';
+import { DEFAULT_SECTION_ORDER } from './types';
 
 const defaultResume: ResumeData = {
   headline: 'Software Engineer II | Full Stack · Cloud · Systems | 6 Years',
@@ -80,6 +81,8 @@ const defaultResume: ResumeData = {
   ],
 
   awards: [],
+
+  sectionOrder: DEFAULT_SECTION_ORDER,
 };
 
 interface ResumeStore {
@@ -87,6 +90,8 @@ interface ResumeStore {
   lastSaved: number | null;
   setResume: (data: ResumeData) => void;
   updateResume: (partial: Partial<ResumeData>) => void;
+  reorderSections: (order: SectionKey[]) => void;
+  moveSection: (key: SectionKey, direction: 'up' | 'down') => void;
   resetResume: () => void;
 }
 
@@ -101,11 +106,36 @@ export const useResumeStore = create<ResumeStore>()(
           resume: { ...state.resume, ...partial },
           lastSaved: Date.now(),
         })),
+      reorderSections: (order) =>
+        set((state) => ({
+          resume: { ...state.resume, sectionOrder: order },
+          lastSaved: Date.now(),
+        })),
+      moveSection: (key, direction) =>
+        set((state) => {
+          const order = [...state.resume.sectionOrder];
+          const from = order.indexOf(key);
+          const to = direction === 'up' ? from - 1 : from + 1;
+          if (from === -1 || to < 0 || to >= order.length) return state;
+          [order[from], order[to]] = [order[to], order[from]];
+          return {
+            resume: { ...state.resume, sectionOrder: order },
+            lastSaved: Date.now(),
+          };
+        }),
       resetResume: () => set({ resume: defaultResume, lastSaved: null }),
     }),
     {
       name: 'resume-builder-data',
       storage: createJSONStorage(() => localStorage),
+      version: 1,
+      migrate: (persisted) => {
+        const state = persisted as { resume?: Partial<ResumeData> } | undefined;
+        if (state?.resume && !state.resume.sectionOrder) {
+          state.resume.sectionOrder = DEFAULT_SECTION_ORDER;
+        }
+        return state as ResumeStore;
+      },
     }
   )
 );

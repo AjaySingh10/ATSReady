@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { ContactSection } from './components/sections/ContactSection';
-import { SummarySection } from './components/sections/SummarySection';
-import { SkillsSection } from './components/sections/SkillsSection';
-import { ExperienceSection } from './components/sections/ExperienceSection';
-import { EducationSection } from './components/sections/EducationSection';
-import { ProjectsSection } from './components/sections/ProjectsSection';
-import { AwardsSection } from './components/sections/AwardsSection';
+import { SectionReorderList } from './components/SectionReorderList';
 import { ResumePreview } from './components/ResumePreview';
 import { ATSScore } from './components/ui/ATSScore';
 import { useResumeStore } from './store';
@@ -81,12 +76,7 @@ export default function App() {
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
           <ATSScore />
           <ContactSection />
-          <SummarySection />
-          <SkillsSection />
-          <ExperienceSection />
-          <EducationSection />
-          <ProjectsSection />
-          <AwardsSection />
+          <SectionReorderList />
 
           {/* ATS checklist footer */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-800 space-y-1.5">

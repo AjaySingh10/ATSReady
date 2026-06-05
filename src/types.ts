@@ -53,6 +53,23 @@ export interface SkillsData {
   other: string;
 }
 
+export type SectionKey =
+  | 'summary'
+  | 'skills'
+  | 'experience'
+  | 'education'
+  | 'projects'
+  | 'awards';
+
+export const DEFAULT_SECTION_ORDER: SectionKey[] = [
+  'summary',
+  'skills',
+  'experience',
+  'education',
+  'projects',
+  'awards',
+];
+
 export interface ResumeData {
   headline: string;
   summary: string;
@@ -62,4 +79,5 @@ export interface ResumeData {
   education: EducationEntry[];
   projects: ProjectEntry[];
   awards: AwardEntry[];
+  sectionOrder: SectionKey[];
 }

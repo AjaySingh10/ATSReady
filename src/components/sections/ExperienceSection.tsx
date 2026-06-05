@@ -1,6 +1,7 @@
 import { useResumeStore } from '../../store';
 import { SectionCard } from '../ui/SectionCard';
 import { Field } from '../ui/Field';
+import { handleBoldKeyDown, toggleBold } from '../../lib/formatting';
 import type { WorkEntry } from '../../types';
 
 function EntryCard({
@@ -75,6 +76,7 @@ function EntryCard({
       <div>
         <label className="text-xs font-medium text-slate-600 block mb-2">
           Accomplishments — use format: Action → Quantifiable Result
+          <span className="text-slate-400 font-normal"> · select text + Ctrl/Cmd+B to bold</span>
         </label>
         <div className="space-y-2">
           {entry.bullets.map((bullet, i) => (
@@ -83,9 +85,23 @@ function EntryCard({
               <input
                 value={bullet}
                 onChange={(e) => setBullet(i, e.target.value)}
+                onKeyDown={handleBoldKeyDown}
                 placeholder="Describe your key achievement and its quantifiable impact here."
                 className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  const input = e.currentTarget.parentElement?.querySelector('input');
+                  if (input) toggleBold(input);
+                }}
+                title="Bold selected text (Ctrl/Cmd+B)"
+                aria-label="Bold selected text"
+                className="mt-1.5 shrink-0 text-xs font-bold text-slate-400 hover:text-blue-600 border border-slate-200 hover:border-blue-300 rounded px-1.5 leading-5 transition"
+              >
+                B
+              </button>
               {entry.bullets.length > 1 && (
                 <button
                   type="button"
