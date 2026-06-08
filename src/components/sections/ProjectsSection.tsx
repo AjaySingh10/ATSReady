@@ -45,6 +45,24 @@ function EntryCard({
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <Field
+          label="Tech Stack"
+          placeholder="React | Node.js | PostgreSQL"
+          value={entry.tech}
+          onChange={(e) => set('tech', e.target.value)}
+          hint="Shown next to the project name, separated by |"
+        />
+        <Field
+          label="Downloads (optional)"
+          bold
+          placeholder="1,000+ downloads"
+          value={entry.downloads}
+          onChange={(e) => set('downloads', e.target.value)}
+          hint="Select text + B (or Ctrl/Cmd+B) to bold"
+        />
+      </div>
+
       <TextareaField
         label="Description — role, tech stack, and quantifiable impact"
         placeholder="Brief description of what the project does, the tech stack used, and its impact."
@@ -73,7 +91,7 @@ export function ProjectsSection() {
     updateResume({
       projects: [
         ...projects,
-        { id: crypto.randomUUID(), name: '', url: '', description: '' },
+        { id: crypto.randomUUID(), name: '', tech: '', downloads: '', url: '', description: '' },
       ],
     });
 

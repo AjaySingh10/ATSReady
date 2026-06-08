@@ -28,22 +28,17 @@ export function SkillsSection() {
         onChange={(e) => set('frameworks', e.target.value)}
       />
       <Field
-        label="Databases"
-        placeholder="PostgreSQL | MongoDB | MySQL | Redis | Elasticsearch"
+        label="Databases & Streaming"
+        placeholder="PostgreSQL | Redis | MySQL | MongoDB | Kafka"
         value={skills.databases}
         onChange={(e) => set('databases', e.target.value)}
       />
       <Field
         label="Tools & Platforms"
-        placeholder="Amazon Web Services | Docker | Kubernetes | Git | Jenkins"
+        placeholder="Amazon Web Services | Docker | Kubernetes | Terraform | Git | Keycloak"
         value={skills.tools}
         onChange={(e) => set('tools', e.target.value)}
-      />
-      <Field
-        label="Other"
-        placeholder="GraphQL | REST APIs | Agile | System Design | CI/CD"
-        value={skills.other}
-        onChange={(e) => set('other', e.target.value)}
+        hint="Cloud, DevOps tools, and infrastructure"
       />
     </SectionCard>
   );

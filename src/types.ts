@@ -34,6 +34,8 @@ export interface EducationEntry {
 export interface ProjectEntry {
   id: string;
   name: string;
+  tech: string;
+  downloads: string;
   url: string;
   description: string;
 }
@@ -50,7 +52,6 @@ export interface SkillsData {
   frameworks: string;
   databases: string;
   tools: string;
-  other: string;
 }
 
 export type SectionKey =

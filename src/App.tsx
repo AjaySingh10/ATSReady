@@ -38,7 +38,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-100 print:block print:h-auto print:overflow-visible">
       {/* Left panel — form */}
       <div className="no-print w-[480px] shrink-0 flex flex-col h-full border-r border-slate-200 bg-slate-100">
         {/* Toolbar */}
@@ -103,13 +103,13 @@ export default function App() {
       </div>
 
       {/* Right panel — live preview */}
-      <div className="flex-1 overflow-auto bg-slate-300 flex flex-col">
+      <div className="flex-1 overflow-auto bg-slate-300 flex flex-col print:block print:overflow-visible">
         <div className="no-print shrink-0 px-6 py-3 bg-slate-200 border-b border-slate-300 flex items-center gap-3">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Live Preview</span>
           <span className="text-xs text-slate-400">— updates as you type. Use "Export PDF" to download.</span>
         </div>
-        <div className="flex-1 overflow-auto p-6">
-          <div className="flex justify-center">
+        <div className="flex-1 overflow-auto p-6 print:overflow-visible print:p-0">
+          <div className="flex justify-center print:block">
             <ResumePreview />
           </div>
         </div>

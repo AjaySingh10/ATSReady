@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useResumeStore } from '../store';
-import type { SectionKey } from '../types';
+import { DEFAULT_SECTION_ORDER, type SectionKey } from '../types';
 import { SummarySection } from './sections/SummarySection';
 import { SkillsSection } from './sections/SkillsSection';
 import { ExperienceSection } from './sections/ExperienceSection';
@@ -15,6 +15,15 @@ const SECTION_COMPONENTS: Record<SectionKey, () => ReactNode> = {
   education: EducationSection,
   projects: ProjectsSection,
   awards: AwardsSection,
+};
+
+const SECTION_LABELS: Record<SectionKey, string> = {
+  summary: 'Professional Summary',
+  skills: 'Skills',
+  experience: 'Work Experience',
+  education: 'Education',
+  projects: 'Projects',
+  awards: 'Awards',
 };
 
 interface RowProps {
@@ -41,6 +50,7 @@ function ReorderableRow({
   onDrop,
 }: RowProps) {
   const moveSection = useResumeStore((s) => s.moveSection);
+  const removeSection = useResumeStore((s) => s.removeSection);
   const Section = SECTION_COMPONENTS[sectionKey];
 
   const isDragging = dragIndex === index;
@@ -102,6 +112,17 @@ function ReorderableRow({
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 8l5 5 5-5" />
           </svg>
         </button>
+        <button
+          type="button"
+          onClick={() => removeSection(sectionKey)}
+          title={`Remove ${SECTION_LABELS[sectionKey]} section`}
+          aria-label={`Remove ${SECTION_LABELS[sectionKey]} section`}
+          className="mt-0.5 text-slate-300 hover:text-red-500 leading-none"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l8 8M14 6l-8 8" />
+          </svg>
+        </button>
       </div>
 
       {/* Indented to make room for the control rail */}
@@ -115,9 +136,12 @@ function ReorderableRow({
 export function SectionReorderList() {
   const order = useResumeStore((s) => s.resume.sectionOrder);
   const reorderSections = useResumeStore((s) => s.reorderSections);
+  const addSection = useResumeStore((s) => s.addSection);
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  const removed = DEFAULT_SECTION_ORDER.filter((k) => !order.includes(k));
 
   function handleDrop() {
     if (dragIndex === null || overIndex === null || dragIndex === overIndex) {
@@ -152,6 +176,24 @@ export function SectionReorderList() {
           onDrop={handleDrop}
         />
       ))}
+
+      {removed.length > 0 && (
+        <div className="pl-6 pt-1">
+          <p className="text-xs font-medium text-slate-400 mb-1.5">Removed sections</p>
+          <div className="flex flex-wrap gap-2">
+            {removed.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => addSection(key)}
+                className="text-xs px-3 py-1.5 rounded-lg border border-dashed border-slate-300 text-slate-500 hover:border-blue-300 hover:text-blue-600 transition"
+              >
+                + {SECTION_LABELS[key]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

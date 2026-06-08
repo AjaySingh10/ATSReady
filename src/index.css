@@ -25,20 +25,27 @@ body {
   .print-only {
     display: block !important;
   }
-  body {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
     background: white;
     margin: 0;
   }
-  #resume-preview {
+  /* Each .resume-page is a full A4 box (with its own padding/margins) that maps
+     to exactly one physical sheet. */
+  .resume-page {
     box-shadow: none !important;
     margin: 0 !important;
-    padding: 0.5in !important;
-    width: 8.5in !important;
-    min-height: 11in !important;
-    font-size: 10pt !important;
+    break-after: page;
+    break-inside: avoid;
+  }
+  .resume-page:last-child {
+    break-after: auto;
   }
   @page {
-    size: letter;
+    size: A4;
     margin: 0;
   }
 }

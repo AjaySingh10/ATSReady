@@ -23,11 +23,9 @@ const defaultResume: ResumeData = {
   skills: {
     languages: 'Go (Golang) | Rust | C# | TypeScript | Python | JavaScript | Java',
     frameworks: 'Angular | Svelte | .NET | Spring Boot | egui | Node.js | FastAPI',
-    databases: 'PostgreSQL | Redis | MySQL',
+    databases: 'PostgreSQL | Redis | MySQL | MongoDB | Kafka',
     tools:
-      'Amazon Web Services | Docker | Terraform | Nginx | Keycloak | Ory | Snapcraft | SystemD | Git | GitLab CI/CD | Ollama | Claude API | OpenAI API',
-    other:
-      'OAuth2 | OpenID Connect | JSON API | REST APIs | Microservices | Agile/Scrum | Redis Caching | Prompt Engineering',
+      'Amazon Web Services | Docker | Terraform | Nginx | Keycloak | Ory | Snapcraft | SystemD | Git | GitLab CI/CD | Ollama | Claude API | OpenAI API | OAuth2 | OpenID Connect | REST APIs | Microservices | Agile/Scrum | Prompt Engineering',
   },
 
   experience: [
@@ -69,12 +67,16 @@ const defaultResume: ResumeData = {
     {
       id: 'proj-1',
       name: 'Project 1',
+      tech: 'React | Node.js',
+      downloads: '',
       url: 'github.com/you/project-1',
       description: 'Brief description of what the project does, the tech stack used, and its impact.',
     },
     {
       id: 'proj-2',
       name: 'Project 2',
+      tech: 'Python | FastAPI',
+      downloads: '',
       url: 'github.com/you/project-2',
       description: 'Brief description of what the project does, the tech stack used, and its impact.',
     },
@@ -92,6 +94,8 @@ interface ResumeStore {
   updateResume: (partial: Partial<ResumeData>) => void;
   reorderSections: (order: SectionKey[]) => void;
   moveSection: (key: SectionKey, direction: 'up' | 'down') => void;
+  removeSection: (key: SectionKey) => void;
+  addSection: (key: SectionKey) => void;
   resetResume: () => void;
 }
 
@@ -123,16 +127,59 @@ export const useResumeStore = create<ResumeStore>()(
             lastSaved: Date.now(),
           };
         }),
+      removeSection: (key) =>
+        set((state) => ({
+          resume: {
+            ...state.resume,
+            sectionOrder: state.resume.sectionOrder.filter((k) => k !== key),
+          },
+          lastSaved: Date.now(),
+        })),
+      addSection: (key) =>
+        set((state) => {
+          if (state.resume.sectionOrder.includes(key)) return state;
+          return {
+            resume: { ...state.resume, sectionOrder: [...state.resume.sectionOrder, key] },
+            lastSaved: Date.now(),
+          };
+        }),
       resetResume: () => set({ resume: defaultResume, lastSaved: null }),
     }),
     {
       name: 'resume-builder-data',
       storage: createJSONStorage(() => localStorage),
-      version: 1,
+      version: 5,
       migrate: (persisted) => {
         const state = persisted as { resume?: Partial<ResumeData> } | undefined;
-        if (state?.resume && !state.resume.sectionOrder) {
-          state.resume.sectionOrder = DEFAULT_SECTION_ORDER;
+        if (state?.resume) {
+          if (!state.resume.sectionOrder) {
+            state.resume.sectionOrder = DEFAULT_SECTION_ORDER;
+          }
+          const s = state.resume.skills as
+            | Partial<Record<'languages' | 'frameworks' | 'databases' | 'tools' | 'other' | 'platforms', string>>
+            | undefined;
+          if (s) {
+            const join = (...vals: (string | undefined)[]) =>
+              vals.map((v) => (v ?? '').trim()).filter(Boolean).join(' | ');
+            const isLegacyV1 = 'other' in s;
+            // Tools & Platforms is one field: fold in any legacy v1 groups and the v3 Platforms field.
+            const tools = isLegacyV1
+              ? join(s.tools, s.databases, s.other, s.platforms)
+              : join(s.tools, s.platforms);
+            // v5: "Databases & Streaming" is a fresh, separate field.
+            state.resume.skills = {
+              languages: s.languages ?? '',
+              frameworks: s.frameworks ?? '',
+              databases: '',
+              tools,
+            };
+          }
+          // v3: projects gained a tech-stack field; v4: an optional downloads field.
+          if (Array.isArray(state.resume.projects)) {
+            state.resume.projects = (state.resume.projects as unknown as Array<Record<string, unknown>>).map(
+              (p) => ({ tech: '', downloads: '', ...p }) as unknown as ResumeData['projects'][number]
+            );
+          }
         }
         return state as ResumeStore;
       },
