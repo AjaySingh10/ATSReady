@@ -301,37 +301,53 @@ export function ResumePreview() {
   }, [blocks, tick]);
 
   // Fallback before the first measurement: render everything on one page.
-  const paginated = pages.length > 0;
-  const renderedPages = paginated ? pages : [blocks.map((_, i) => i)];
+  // `pages` holds block *indices* from a prior measurement. When `blocks`
+  // changes (e.g. a bullet is removed) those indices can point past the new,
+  // shorter array for the one render before the layout effect re-measures.
+  // Rendering `blocks[i].key` on a stale out-of-range index would throw and
+  // crash the whole app, so fall back to the single-page layout until the
+  // next measurement reconciles `pages` with the current `blocks`.
+  const pagesValid =
+    pages.length > 0 && pages.every((page) => page.every((i) => i < blocks.length));
+  const paginated = pagesValid;
+  const renderedPages = pagesValid ? pages : [blocks.map((_, i) => i)];
 
   return (
     <>
-      {/* Hidden measurement layer — same content width as a page's text column. */}
+      {/* Hidden measurement layer — same content width as a page's text column.
+          The outer wrapper is a zero-size, positioned, clipped containing block:
+          it anchors the absolutely-positioned measure layer so its multi-page
+          height stays clipped here instead of inflating the document's scroll
+          height (which would add a stray window scrollbar next to the pane's). */}
       <div
-        ref={measureRef}
         aria-hidden
         className="no-print"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: `${CONTENT_W}mm`,
-          visibility: 'hidden',
-          pointerEvents: 'none',
-          zIndex: -1,
-          fontFamily: 'Calibri, Arial, sans-serif',
-          fontSize: '10pt',
-          lineHeight: '1.3',
-          overflow: 'hidden',
-        }}
+        style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
       >
-        <div ref={probeRef} style={{ width: '100mm', height: 0 }} />
-        {blocks.map((b) => (
-          <div data-block key={b.key}>
-            {b.node}
-          </div>
-        ))}
-        <div data-sentinel style={{ height: 0 }} />
+        <div
+          ref={measureRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: `${CONTENT_W}mm`,
+            visibility: 'hidden',
+            pointerEvents: 'none',
+            zIndex: -1,
+            fontFamily: 'Calibri, Arial, sans-serif',
+            fontSize: '10pt',
+            lineHeight: '1.3',
+            overflow: 'hidden',
+          }}
+        >
+          <div ref={probeRef} style={{ width: '100mm', height: 0 }} />
+          {blocks.map((b) => (
+            <div data-block key={b.key}>
+              {b.node}
+            </div>
+          ))}
+          <div data-sentinel style={{ height: 0 }} />
+        </div>
       </div>
 
       {/* Real, paginated A4 pages — identical in preview and PDF.

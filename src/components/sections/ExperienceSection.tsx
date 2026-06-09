@@ -1,8 +1,17 @@
+import { useState } from 'react';
 import { useResumeStore } from '../../store';
 import { SectionCard } from '../ui/SectionCard';
 import { Field } from '../ui/Field';
 import { handleBoldKeyDown, toggleBold } from '../../lib/formatting';
 import type { WorkEntry } from '../../types';
+
+// Grow a textarea to fit its content so the whole bullet stays visible (no
+// single-line truncation), while still wrapping long text onto multiple rows.
+function autoGrow(el: HTMLTextAreaElement | null) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = `${el.scrollHeight}px`;
+}
 
 function EntryCard({
   entry,
@@ -26,6 +35,25 @@ function EntryCard({
 
   const addBullet = () => set('bullets', [...entry.bullets, '']);
   const removeBullet = (i: number) => set('bullets', entry.bullets.filter((_, idx) => idx !== i));
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  const moveBullet = (from: number, to: number) => {
+    if (to < 0 || to >= entry.bullets.length) return;
+    const bullets = [...entry.bullets];
+    const [moved] = bullets.splice(from, 1);
+    bullets.splice(to, 0, moved);
+    set('bullets', bullets);
+  };
+
+  const handleBulletDrop = () => {
+    if (dragIndex !== null && overIndex !== null && dragIndex !== overIndex) {
+      moveBullet(dragIndex, overIndex);
+    }
+    setDragIndex(null);
+    setOverIndex(null);
+  };
 
   return (
     <div className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50">
@@ -80,21 +108,67 @@ function EntryCard({
         </label>
         <div className="space-y-2">
           {entry.bullets.map((bullet, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <span className="text-slate-300 mt-2.5 text-sm">•</span>
-              <input
+            <div
+              key={i}
+              onDragEnter={() => dragIndex !== null && setOverIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleBulletDrop();
+              }}
+              className={`flex gap-2 items-start rounded-lg transition ${
+                dragIndex === i ? 'opacity-40' : ''
+              } ${
+                overIndex === i && dragIndex !== null && dragIndex !== i
+                  ? 'ring-2 ring-blue-400'
+                  : ''
+              }`}
+            >
+              <button
+                type="button"
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragEnd={() => {
+                  setDragIndex(null);
+                  setOverIndex(null);
+                }}
+                title="Drag to reorder"
+                aria-label={`Drag bullet ${i + 1} to reorder`}
+                className="mt-2 shrink-0 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 leading-none"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <circle cx="7" cy="5" r="1.4" />
+                  <circle cx="13" cy="5" r="1.4" />
+                  <circle cx="7" cy="10" r="1.4" />
+                  <circle cx="13" cy="10" r="1.4" />
+                  <circle cx="7" cy="15" r="1.4" />
+                  <circle cx="13" cy="15" r="1.4" />
+                </svg>
+              </button>
+              <textarea
+                ref={autoGrow}
+                rows={1}
                 value={bullet}
-                onChange={(e) => setBullet(i, e.target.value)}
-                onKeyDown={handleBoldKeyDown}
+                onChange={(e) => {
+                  setBullet(i, e.target.value);
+                  autoGrow(e.target);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleBoldKeyDown(e);
+                }}
                 placeholder="Describe your key achievement and its quantifiable impact here."
-                className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="flex-1 resize-none overflow-hidden border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white leading-snug"
               />
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={(e) => {
-                  const input = e.currentTarget.parentElement?.querySelector('input');
-                  if (input) toggleBold(input);
+                  const field = e.currentTarget.parentElement?.querySelector('textarea');
+                  if (field) toggleBold(field);
                 }}
                 title="Bold selected text (Ctrl/Cmd+B)"
                 aria-label="Bold selected text"
