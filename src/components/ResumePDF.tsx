@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, Link, StyleSheet } from '@react-pdf/renderer';
+import type { Style } from '@react-pdf/types';
 import type { ResumeData } from '../types';
 import { DEFAULT_SECTION_ORDER } from '../types';
 
@@ -77,7 +78,7 @@ const s = StyleSheet.create({
   bold: { fontFamily: 'Helvetica-Bold' },
 });
 
-function RichText({ text, style }: { text: string; style?: object }) {
+function RichText({ text, style }: { text: string; style?: Style | Style[] }) {
   const parts = text.split(/(\*\*[^*]+?\*\*)/g);
   if (parts.length === 1) return <Text style={style}>{text}</Text>;
   return (
