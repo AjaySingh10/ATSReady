@@ -48,7 +48,9 @@ export default function App() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${resume.contact.name || 'resume'}.pdf`;
+      const name = (resume.contact.name || 'my')
+        .trim().toLowerCase().split(/\s+/).join('-');
+      a.download = `${name}-resume.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {

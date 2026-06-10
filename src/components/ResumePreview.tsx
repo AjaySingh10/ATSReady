@@ -15,7 +15,7 @@ type Block = { key: string; keepWithNext: boolean; node: React.ReactNode };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-[10px] mb-0.5">
+    <div className="mt-[6.5pt] mb-0.5">
       <h2 className="text-[11pt] font-bold text-black">{children}</h2>
       <hr className="border-t border-black mt-0.5" />
     </div>
@@ -34,7 +34,7 @@ function skillLine(label: string, value: string) {
   if (!value.trim()) return null;
   // Flex row like the PDF: wrapped value lines hang-indent under the value column.
   return (
-    <p key={label} className="text-[9.5pt] leading-[1.3] flex">
+    <p key={label} className="text-[9.5pt] leading-[1.2] flex">
       <span className="font-bold whitespace-nowrap">{label}:{' '}</span>
       <span className="text-black flex-1">{value}</span>
     </p>
@@ -65,7 +65,7 @@ export function ResumePreview() {
       key: 'header',
       keepWithNext: false,
       node: (
-        <div className="text-center mb-1">
+        <div className="text-center mb-[2pt]">
           <h1 className="text-[18pt] font-bold text-black mb-[13pt]">
             {c.name || 'Your Name'}
           </h1>
@@ -108,7 +108,7 @@ export function ResumePreview() {
           key: 'skills-body',
           keepWithNext: false,
           node: (
-            <div className="space-y-0.5">
+            <div className="space-y-[1pt]">
               {skillLine('Programming Languages', skills.languages)}
               {skillLine('Frameworks & Libraries', skills.frameworks)}
               {skillLine('Databases & Streaming', skills.databases)}
@@ -135,7 +135,7 @@ export function ResumePreview() {
                     {e.location && <span className="text-[9.5pt] text-black">, {e.location}</span>}
                     {dateStr && <span className="text-[9pt] text-black">{'  |  '}{dateStr}</span>}
                   </div>
-                  <p className="font-bold italic text-[9.5pt] text-black mb-0.5">{e.title}</p>
+                  <p className="font-bold italic text-[9.5pt] text-black mb-[1pt]">{e.title}</p>
                 </div>
               ),
             });
@@ -144,7 +144,7 @@ export function ResumePreview() {
                 key: `exp-${e.id}-b${bi}`,
                 keepWithNext: false,
                 node: (
-                  <ul className="list-disc list-outside ml-4 mb-0.5">
+                  <ul className="list-disc list-outside ml-4 mb-[1pt]">
                     <li className="text-[9.5pt] text-black leading-[1.3]">{renderRichText(b)}</li>
                   </ul>
                 ),
@@ -177,7 +177,7 @@ export function ResumePreview() {
                     <span className="text-[9.5pt] text-black"> | {renderRichText(p.downloads)}</span>
                   )}
                   {p.description && (
-                    <p className="text-[9.5pt] text-black mt-0.5 leading-[1.3]">{renderRichText(p.description)}</p>
+                    <p className="text-[9.5pt] text-black mt-[1pt] leading-[1.3]">{renderRichText(p.description)}</p>
                   )}
                 </div>
               ),
@@ -204,7 +204,7 @@ export function ResumePreview() {
                     {e.gpa && <span className="ml-2">GPA: {e.gpa}</span>}
                   </p>
                   {e.achievements && (
-                    <p className="text-[9.5pt] text-black mt-0.5">{renderRichText(e.achievements)}</p>
+                    <p className="text-[9.5pt] text-black mt-[1pt]">{renderRichText(e.achievements)}</p>
                   )}
                 </div>
               ),
@@ -253,8 +253,12 @@ export function ResumePreview() {
 
     const pxPerMm = probe.offsetWidth / 100;
     if (!pxPerMm) return;
-    // A small safety margin avoids clipping from sub-pixel rounding.
-    const pageContentPx = (PAGE_H - PAD_V * 2) * pxPerMm - 2;
+    // The browser's text engine measures runs slightly taller than react-pdf
+    // (different wrapping + line-box rounding), which can split the preview
+    // onto a new page when the exported PDF still fits. Allow ~2% overflow —
+    // it renders into the page's bottom padding, so nothing visibly clips —
+    // so the preview's page-break decisions track the actual PDF export.
+    const pageContentPx = (PAGE_H - PAD_V * 2) * pxPerMm * 1.02;
 
     const wrappers = Array.from(container.querySelectorAll<HTMLElement>('[data-block]'));
     const sentinel = container.querySelector<HTMLElement>('[data-sentinel]');
