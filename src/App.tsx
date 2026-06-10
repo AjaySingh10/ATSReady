@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { pdf } from '@react-pdf/renderer';
 import { ContactSection } from './components/sections/ContactSection';
+import { ResumePDF } from './components/ResumePDF';
 import { SectionReorderList } from './components/SectionReorderList';
 import { ResumePreview } from './components/ResumePreview';
 import { ATSScore } from './components/ui/ATSScore';
@@ -25,7 +27,9 @@ function SaveStatus() {
 
 export default function App() {
   const resetResume = useResumeStore((s) => s.resetResume);
+  const resume = useResumeStore((s) => s.resume);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   function handleReset() {
     if (!confirmReset) {
@@ -35,6 +39,21 @@ export default function App() {
     }
     resetResume();
     setConfirmReset(false);
+  }
+
+  async function handleExportPDF() {
+    setExporting(true);
+    try {
+      const blob = await pdf(<ResumePDF resume={resume} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${resume.contact.name || 'resume'}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -61,13 +80,14 @@ export default function App() {
               {confirmReset ? 'Confirm reset?' : 'Reset'}
             </button>
             <button
-              onClick={() => window.print()}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm"
+              onClick={handleExportPDF}
+              disabled={exporting}
+              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Export PDF
+              {exporting ? 'Generating…' : 'Export PDF'}
             </button>
           </div>
         </div>

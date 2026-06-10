@@ -15,9 +15,9 @@ type Block = { key: string; keepWithNext: boolean; node: React.ReactNode };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-2 mb-0.5">
-      <h2 className="text-[11pt] font-bold uppercase tracking-wide text-slate-900">{children}</h2>
-      <hr className="border-t border-slate-900 mt-0.5" />
+    <div className="mt-[10px] mb-0.5">
+      <h2 className="text-[11pt] font-bold text-black">{children}</h2>
+      <hr className="border-t border-black mt-0.5" />
     </div>
   );
 }
@@ -32,10 +32,11 @@ function toHref(value: string): string | null {
 
 function skillLine(label: string, value: string) {
   if (!value.trim()) return null;
+  // Flex row like the PDF: wrapped value lines hang-indent under the value column.
   return (
-    <p key={label} className="text-[9.5pt] leading-snug">
-      <span className="font-semibold">{label}: </span>
-      <span className="text-slate-700">{value}</span>
+    <p key={label} className="text-[9.5pt] leading-[1.3] flex">
+      <span className="font-bold whitespace-nowrap">{label}:{' '}</span>
+      <span className="text-black flex-1">{value}</span>
     </p>
   );
 }
@@ -65,19 +66,19 @@ export function ResumePreview() {
       keepWithNext: false,
       node: (
         <div className="text-center mb-1">
-          <h1 className="text-[18pt] font-bold tracking-tight text-slate-900 mb-0.5">
+          <h1 className="text-[18pt] font-bold text-black mb-[13pt]">
             {c.name || 'Your Name'}
           </h1>
           {r.headline && (
-            <p className="text-[10pt] font-semibold text-slate-700 mb-1">{r.headline}</p>
+            <p className="text-[9.5pt] text-black mb-[5pt]">{r.headline}</p>
           )}
           {contactItems.length > 0 && (
-            <p className="text-[9pt] text-slate-900">
+            <p className="text-[9pt] text-black">
               {contactItems.map((item, i) => (
                 <span key={i}>
-                  {i > 0 && <span className="text-slate-900"> | </span>}
+                  {i > 0 && <span> | </span>}
                   {item.href ? (
-                    <a href={item.href} target="_blank" rel="noreferrer" className="text-slate-900 no-underline">
+                    <a href={item.href} target="_blank" rel="noreferrer" className="text-black no-underline">
                       {item.value}
                     </a>
                   ) : (
@@ -93,16 +94,16 @@ export function ResumePreview() {
 
     for (const key of order) {
       if (key === 'summary' && r.summary) {
-        out.push({ key: 'summary-title', keepWithNext: true, node: <SectionTitle>Professional Summary</SectionTitle> });
+        out.push({ key: 'summary-title', keepWithNext: true, node: <SectionTitle>SUMMARY</SectionTitle> });
         out.push({
           key: 'summary-body',
           keepWithNext: false,
-          node: <p className="text-[9.5pt] text-slate-800 leading-snug">{renderRichText(r.summary)}</p>,
+          node: <p className="text-[9.5pt] text-black leading-[1.3]">{renderRichText(r.summary)}</p>,
         });
       }
 
       if (key === 'skills' && Object.values(skills).some((v) => v.trim())) {
-        out.push({ key: 'skills-title', keepWithNext: true, node: <SectionTitle>Skills</SectionTitle> });
+        out.push({ key: 'skills-title', keepWithNext: true, node: <SectionTitle>SKILLS</SectionTitle> });
         out.push({
           key: 'skills-body',
           keepWithNext: false,
@@ -118,26 +119,23 @@ export function ResumePreview() {
       }
 
       if (key === 'experience' && experience.some((e) => e.company || e.title)) {
-        out.push({ key: 'exp-title', keepWithNext: true, node: <SectionTitle>Work Experience</SectionTitle> });
+        out.push({ key: 'exp-title', keepWithNext: true, node: <SectionTitle>EXPERIENCE</SectionTitle> });
         experience
           .filter((e) => e.company || e.title)
           .forEach((e, ei) => {
             const bullets = e.bullets.filter((b) => b.trim());
+            const dateStr = [e.startDate, e.current ? 'Present' : e.endDate].filter(Boolean).join(' – ');
             out.push({
               key: `exp-${e.id}-h`,
               keepWithNext: bullets.length > 0,
               node: (
-                <div className={ei === 0 ? '' : 'mt-2'}>
-                  <div className="flex justify-between items-baseline">
-                    <div>
-                      <span className="font-bold text-[10pt]">{e.company || 'Company'}</span>
-                      {e.location && <span className="text-[9.5pt] text-slate-600">, {e.location}</span>}
-                    </div>
-                    <span className="text-[9pt] text-slate-600 whitespace-nowrap ml-2">
-                      {[e.startDate, e.current ? 'Present' : e.endDate].filter(Boolean).join(' – ')}
-                    </span>
+                <div className={ei === 0 ? '' : 'mt-[5pt]'}>
+                  <div>
+                    <span className="font-bold text-[10pt] text-black">{e.company || 'Company'}</span>
+                    {e.location && <span className="text-[9.5pt] text-black">, {e.location}</span>}
+                    {dateStr && <span className="text-[9pt] text-black">{'  |  '}{dateStr}</span>}
                   </div>
-                  <p className="font-semibold italic text-[9.5pt] text-slate-700 mb-0.5">{e.title}</p>
+                  <p className="font-bold italic text-[9.5pt] text-black mb-0.5">{e.title}</p>
                 </div>
               ),
             });
@@ -147,7 +145,7 @@ export function ResumePreview() {
                 keepWithNext: false,
                 node: (
                   <ul className="list-disc list-outside ml-4 mb-0.5">
-                    <li className="text-[9.5pt] text-slate-800 leading-snug">{renderRichText(b)}</li>
+                    <li className="text-[9.5pt] text-black leading-[1.3]">{renderRichText(b)}</li>
                   </ul>
                 ),
               });
@@ -156,7 +154,7 @@ export function ResumePreview() {
       }
 
       if (key === 'projects' && projects.some((p) => p.name || p.description)) {
-        out.push({ key: 'proj-title', keepWithNext: true, node: <SectionTitle>Projects</SectionTitle> });
+        out.push({ key: 'proj-title', keepWithNext: true, node: <SectionTitle>PROJECTS</SectionTitle> });
         projects
           .filter((p) => p.name || p.description)
           .forEach((p, pi) => {
@@ -164,22 +162,22 @@ export function ResumePreview() {
               key: `proj-${p.id}`,
               keepWithNext: false,
               node: (
-                <div className={pi === 0 ? '' : 'mt-1.5'}>
-                  <span className="font-bold text-[10pt]">
+                <div className={pi === 0 ? '' : 'mt-[3.5pt]'}>
+                  <span className="font-bold text-[10pt] text-black">
                     {p.url ? (
-                      <a href={p.url} className="text-slate-900 no-underline">
+                      <a href={p.url} className="text-black no-underline">
                         {p.name}
                       </a>
                     ) : (
                       p.name
                     )}
                   </span>
-                  {p.tech && <span className="text-[9.5pt] text-slate-700"> | {p.tech}</span>}
+                  {p.tech && <span className="text-[9.5pt] text-black"> | {p.tech}</span>}
                   {p.downloads && (
-                    <span className="text-[9.5pt] text-slate-700"> | {renderRichText(p.downloads)}</span>
+                    <span className="text-[9.5pt] text-black"> | {renderRichText(p.downloads)}</span>
                   )}
                   {p.description && (
-                    <p className="text-[9.5pt] text-slate-800 mt-0.5 leading-snug">{renderRichText(p.description)}</p>
+                    <p className="text-[9.5pt] text-black mt-0.5 leading-[1.3]">{renderRichText(p.description)}</p>
                   )}
                 </div>
               ),
@@ -188,7 +186,7 @@ export function ResumePreview() {
       }
 
       if (key === 'education' && education.some((e) => e.degree || e.university)) {
-        out.push({ key: 'edu-title', keepWithNext: true, node: <SectionTitle>Education</SectionTitle> });
+        out.push({ key: 'edu-title', keepWithNext: true, node: <SectionTitle>EDUCATION</SectionTitle> });
         education
           .filter((e) => e.degree || e.university)
           .forEach((e, ei) => {
@@ -196,17 +194,17 @@ export function ResumePreview() {
               key: `edu-${e.id}`,
               keepWithNext: false,
               node: (
-                <div className={ei === 0 ? '' : 'mt-1.5'}>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-bold text-[10pt]">{e.degree || 'Degree'}</span>
-                    {e.graduationYear && <span className="text-[9pt] text-slate-600">{e.graduationYear}</span>}
+                <div className={ei === 0 ? '' : 'mt-[3.5pt]'}>
+                  <div>
+                    <span className="font-bold text-[10pt] text-black">{e.degree || 'Degree'}</span>
+                    {e.graduationYear && <span className="text-[9pt] text-black">{'  |  '}{e.graduationYear}</span>}
                   </div>
-                  <p className="text-[9.5pt] text-slate-700">
+                  <p className="text-[9.5pt] text-black">
                     {[e.university, e.location].filter(Boolean).join(', ')}
-                    {e.gpa && <span className="ml-2 font-medium">GPA: {e.gpa}</span>}
+                    {e.gpa && <span className="ml-2">GPA: {e.gpa}</span>}
                   </p>
                   {e.achievements && (
-                    <p className="text-[9.5pt] text-slate-600 mt-0.5">{renderRichText(e.achievements)}</p>
+                    <p className="text-[9.5pt] text-black mt-0.5">{renderRichText(e.achievements)}</p>
                   )}
                 </div>
               ),
@@ -215,7 +213,7 @@ export function ResumePreview() {
       }
 
       if (key === 'awards' && awards.some((a) => a.achievement || a.competition)) {
-        out.push({ key: 'awards-title', keepWithNext: true, node: <SectionTitle>Awards, Accolades &amp; Certifications</SectionTitle> });
+        out.push({ key: 'awards-title', keepWithNext: true, node: <SectionTitle>AWARDS &amp; CERTIFICATIONS</SectionTitle> });
         awards
           .filter((a) => a.achievement || a.competition)
           .forEach((a, ai) => {
@@ -223,8 +221,8 @@ export function ResumePreview() {
               key: `award-${a.id}`,
               keepWithNext: false,
               node: (
-                <div className={`flex gap-2 text-[9.5pt] text-slate-800 ${ai === 0 ? '' : 'mt-0.5'}`}>
-                  {a.year && <span className="font-semibold w-10 shrink-0">{a.year}</span>}
+                <div className={`flex gap-2 text-[9.5pt] text-black ${ai === 0 ? '' : 'mt-0.5'}`}>
+                  {a.year && <span className="font-bold w-10 shrink-0">{a.year}</span>}
                   <span>{[a.achievement, a.competition].filter(Boolean).join(' | ')}</span>
                 </div>
               ),
@@ -334,9 +332,9 @@ export function ResumePreview() {
             visibility: 'hidden',
             pointerEvents: 'none',
             zIndex: -1,
-            fontFamily: 'Calibri, Arial, sans-serif',
-            fontSize: '10pt',
-            lineHeight: '1.3',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontSize: '9.5pt',
+            lineHeight: '1.2',
             overflow: 'hidden',
           }}
         >
@@ -356,7 +354,7 @@ export function ResumePreview() {
         {renderedPages.map((pageBlocks, pi) => (
           <div
             key={pi}
-            className="resume-page bg-white shadow-xl font-[Calibri,Arial,sans-serif] text-slate-900 mx-auto mb-6"
+            className="resume-page bg-white shadow-xl font-[Arial,Helvetica,sans-serif] text-black mx-auto mb-6"
             style={{
               width: `${PAGE_W}mm`,
               // Once paginated, each page is a fixed A4 box. Before that, never clip —
@@ -364,8 +362,8 @@ export function ResumePreview() {
               height: paginated ? `${PAGE_H}mm` : undefined,
               minHeight: `${PAGE_H}mm`,
               padding: `${PAD_V}mm ${PAD_H}mm`,
-              fontSize: '10pt',
-              lineHeight: '1.3',
+              fontSize: '9.5pt',
+              lineHeight: '1.2',
               boxSizing: 'border-box',
               overflow: paginated ? 'hidden' : 'visible',
             }}

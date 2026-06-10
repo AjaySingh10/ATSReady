@@ -40,6 +40,13 @@ body {
     margin: 0 !important;
     break-after: page;
     break-inside: avoid;
+    /* Arial always embeds with a proper ToUnicode table in PDF renderers,
+       making every character extractable by ATS parsers. Calibri's subsetted
+       embedding can omit the ToUnicode map in some browser/OS combos. */
+    font-family: Arial, Helvetica, sans-serif !important;
+    /* Prevent the browser from ghosting colours or skipping backgrounds */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
   .resume-page:last-child {
     break-after: auto;
